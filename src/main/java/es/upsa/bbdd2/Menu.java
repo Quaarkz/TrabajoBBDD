@@ -1,4 +1,4 @@
-package es.upsa.bbdd2.database;
+package es.upsa.bbdd2;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package es.upsa.bbdd2.database;
+package es.upsa.bbdd2;
 
 
 import lombok.AllArgsConstructor;
@@ -12,9 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder(setterPrefix = "with")
 
 
-public class Ingredientes {
-
+public class Platos {
     private int id;
-    private String ingrediente;
-
+    private String nombre;
+    private String descripcion;
+    private float precio;
+    private EnumeracionTipo tipo; //hacer enum
 }

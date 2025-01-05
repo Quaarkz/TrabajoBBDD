@@ -1,4 +1,4 @@
-package es.upsa.bbdd2.database;
+package es.upsa.bbdd2;
 
 public enum EnumeracionTipo {
 
