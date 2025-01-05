@@ -21,3 +21,4 @@ public class Ingrediente {
     private List<CantidadIngrediente> cantidades;
 
 }
+

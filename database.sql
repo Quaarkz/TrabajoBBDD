@@ -1,4 +1,3 @@
-CREATE DATABASE database;
 
 DROP SEQUENCE IF EXISTS SEQ_MENUS CASCADE;
 DROP SEQUENCE IF EXISTS SEQ_PLATOS CASCADE;
@@ -54,13 +53,6 @@ CREATE INDEX idx_menu_nombre ON Menus(nombre);
 CREATE INDEX idx_plato_nombre ON Platos(nombre);
 CREATE INDEX idx_ingrediente_nombre ON Ingredientes(nombre);
 
-INSERT INTO Ingredientes (nombre) VALUES
-                                      ('Tomate'),
-                                      ('Lechuga'),
-                                      ('Pollo'),
-                                      ('Arroz'),
-                                      ('Azafrán'),
-                                      ('Caramelo');
 
 INSERT INTO Platos (nombre, descripcion, precio, tipo) VALUES
                                                            ('Ensalada César', 'Ensalada fresca con aderezo César y pollo', 8.50, 'ENTRANTE'),
