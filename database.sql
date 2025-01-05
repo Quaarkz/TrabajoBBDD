@@ -54,24 +54,3 @@ CREATE INDEX idx_plato_nombre ON Platos(nombre);
 CREATE INDEX idx_ingrediente_nombre ON Ingredientes(nombre);
 
 
-INSERT INTO Platos (nombre, descripcion, precio, tipo) VALUES
-                                                           ('Ensalada César', 'Ensalada fresca con aderezo César y pollo', 8.50, 'ENTRANTE'),
-                                                           ('Paella', 'Arroz con mariscos y azafrán', 15.00, 'PRINCIPAL'),
-                                                           ('Flan', 'Postre dulce con caramelo', 5.00, 'POSTRE');
-
-INSERT INTO PlatoIngrediente (plato_id, ingrediente_id, cantidad, unidad_medida) VALUES
-                                                                                     (1, 1, 100, 'GRAMOS'), -- Ensalada César: Tomate
-                                                                                     (1, 2, 50, 'GRAMOS'),  -- Ensalada César: Lechuga
-                                                                                     (1, 3, 200, 'GRAMOS'), -- Ensalada César: Pollo
-                                                                                     (2, 3, 300, 'GRAMOS'), -- Paella: Pollo
-                                                                                     (2, 4, 200, 'GRAMOS'), -- Paella: Arroz
-                                                                                     (2, 5, 1, 'UNIDADES'), -- Paella: Azafrán
-                                                                                     (3, 6, 50, 'GRAMOS');  -- Flan: Caramelo
-
-INSERT INTO Menus (nombre, precio, desde, hasta) VALUES
-    ('Menú Especial', 25.50, '2025-01-01', '2025-01-31');
-
-INSERT INTO MenuPlato (menu_id, plato_id) VALUES
-                                              (1, 1), -- Menú Especial: Ensalada César
-                                              (1, 2), -- Menú Especial: Paella
-                                              (1, 3); -- Menú Especial: Flan
