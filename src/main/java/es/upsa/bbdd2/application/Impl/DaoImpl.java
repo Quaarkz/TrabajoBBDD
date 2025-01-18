@@ -82,7 +82,7 @@ public class DaoImpl implements Dao {
         //Si no existiera alguno de los platos de la lista se propagará excepcion y no se creará
 
 
-        final String MenuSql = "INSERT INTO Menu (id, nombre, hasta, desde) VALUES (nextval('seq_menus'), ?, ?, ?)";
+         final String MenuSql = "INSERT INTO Menu (id, nombre, hasta, desde) VALUES (nextval('seq_menus'), ?, ?, ?)";
 
 
         final String[] fields = {"id"};
