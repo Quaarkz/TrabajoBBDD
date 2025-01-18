@@ -10,12 +10,14 @@ import org.postgresql.Driver;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class DaoImpl implements Dao {
     Connection connection;
+
     public DaoImpl(String url, String user, String password) throws SQLException {
         DriverManager.registerDriver(new Driver());
         this.connection = DriverManager.getConnection(url, user, password);
@@ -41,19 +43,19 @@ public class DaoImpl implements Dao {
                 .withTipo(tipo)
                 .withIngredientes(cantidadesIngredientes)
                 .build();
-        try(PreparedStatement preparedStatement = connection.prepareStatement(SQL, fields)){
+        try (PreparedStatement preparedStatement = connection.prepareStatement(SQL, fields)) {
             preparedStatement.setString(1, nombre);
             preparedStatement.setString(2, descripcion);
             preparedStatement.setDouble(3, precio);
             preparedStatement.setString(4, tipo.name());
             preparedStatement.executeUpdate();
-            try(ResultSet generatedKeys = preparedStatement.getGeneratedKeys()){
+            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 generatedKeys.next();
                 String id = generatedKeys.getString(1);
                 platoInsertado.setId(id);
                 return platoInsertado;
             }
-        }catch (SQLException sqlException){
+        } catch (SQLException sqlException) {
             throw new ApplicationException(sqlException);
             //throw manageSQLException(sqlException);
         }
@@ -80,10 +82,48 @@ public class DaoImpl implements Dao {
         //Si no existiera alguno de los platos de la lista se propagará excepcion y no se creará
 
 
-        final String MenuSql = "INSERT INTO Menu (id, nombre, hasta, desde) VALUES (nextval('seq_menus'), ?, ?, ?)" ;
-        final String PlatoSql = "INSERT INTO Plato (id, nombre, descripcion, precio, tipo) VALUES (nextval('seq_platos'), ?, ?, ?, ?)";
+        final String MenuSql = "INSERT INTO Menu (id, nombre, hasta, desde) VALUES (nextval('seq_menus'), ?, ?, ?)";
+
 
         final String[] fields = {"id"};
+
+        double MenuPrecio = 0.0;
+        Map<EnumeracionTipo, List<Plato>> platosPorTipo = new HashMap<>();
+        for (String plato : platos) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT precio FROM plato WHERE id = ?")) {
+                preparedStatement.setString(1, plato);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        MenuPrecio += resultSet.getDouble("precio");
+                        EnumeracionTipo tipo = EnumeracionTipo.valueOf(resultSet.getString("tipo"));
+                        if (platosPorTipo.containsKey(tipo)) {
+                            platosPorTipo.get(tipo).add(Plato.builder()
+                                    .withId(plato)
+                                    .withNombre(resultSet.getString("nombre"))
+                                    .withDescripcion(resultSet.getString("descripcion"))
+                                    .withPrecio(resultSet.getDouble("precio"))
+                                    .withTipo(tipo)
+                                    .build());
+                        } else {
+                            List<Plato> platos = new ArrayList<>();
+                            platos.add(Plato.builder()
+                                    .withId(plato)
+                                    .withNombre(resultSet.getString("nombre"))
+                                    .withDescripcion(resultSet.getString("descripcion"))
+                                    .withPrecio(resultSet.getDouble("precio"))
+                                    .withTipo(tipo)
+                                    .build());
+                            platosPorTipo.put(tipo, platos);
+                        }
+                    } else {
+                        throw new ApplicationException("El plato " + plato + " no existe");
+                    }
+                }
+            } catch (SQLException sqlException) {
+                throw new ApplicationException(sqlException);
+            }
+        }
+        MenuPrecio = MenuPrecio - (MenuPrecio * 0.15);
 
         Menu menuInsertado = Menu.builder()
                 .withId("0")
@@ -92,58 +132,58 @@ public class DaoImpl implements Dao {
                 .withDesde(desde)
                 .build();
 
-        double SumaPrecios = 0.0;
-        Map<EnumeracionTipo, List<Plato>> platosPorTipo = new HashMap<>();
+        try (PreparedStatement preparedStatement = connection.prepareStatement(MenuSql, fields)) {
+            preparedStatement.setString(1, nombre);
+            preparedStatement.setDate(2, Date.valueOf(hasta));
+            preparedStatement.setDate(3, Date.valueOf(desde));
+            preparedStatement.executeUpdate();
+            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                generatedKeys.next();
+                String id = generatedKeys.getString(1);
+                menuInsertado.setId(id);
+                return menuInsertado;
+            }
+        } catch (SQLException sqlException) {
+            throw new ApplicationException(sqlException);
+            //throw manageSQLException(sqlException);
+        }
 
-        try{
-            connection.setAutoCommit(false);
-            for (String plato : platos) {
-                try(PreparedStatement stmt = connection.prepareStatement(PlatoSql)){
-                    stmt.setString(1, plato);
-                    try(ResultSet rs = stmt.executeQuery()){
-                        if(!rs.next()){
-                            throw new Exception("No se ha encontrado el plato");
-                        }
-                        Plato p = new Plato(rs.getString("id"), rs.getString("nombre"), rs.getString("descripcion"), rs.getFloat("precio"), EnumeracionTipo.valueOf(rs.getString("tipo")));
+
+    }
+
+
+
+                @Override
+                public List<Menu> buscarMenu (LocalDate fecha) throws SQLException {
+                    //Devuelve los objetos menús disponibles en la fecha determinada
+                    //La forma del objeto será:
+                    //"Menu: "   menuConsulta.nombre o algo asi
+                    //"Precio: " menuConsulta.precio
+                    //"Platos:"  map como antes
+                    //Tener en cuenta que puede no haber ninguno en la fecha o varios
+                    return List.of();
+                }
+
+                @Override
+                public List<Plato> buscarPlato (EnumeracionTipo tipo, List < String > ingredientes) throws SQLException
+                {
+                    //Devuelve los platos de EnumeracionTipo que NO tienen ningún ingrediente de la lista
+                    //Tener en cuenta que puede no haber ninguno o muchos
+                    return List.of();
+                }
+
+                @Override
+                public void subirPlatoPrecio (String nombre,double porcentaje) throws ApplicationException {
+                    //Incrementa el valor del plato en cierto porcentaje
+                    //El plato se identifica por el nombre UNIQUE
+                    //Valores entre 0 y 1 que habra que usar como porcentajes
+                    //Por ejemplo 0.4 = 40%
+                }
+
+                @Override
+                public void close () throws Exception {
+                    if (connection != null) {
+                        this.connection.close();
+                        this.connection = null;
                     }
                 }
-            }
-
-
-            return null;
-    }
-
-    @Override
-    public List<Menu> buscarMenu(LocalDate fecha) throws SQLException {
-        //Devuelve los objetos menús disponibles en la fecha determinada
-        //La forma del objeto será:
-        //"Menu: "   menuConsulta.nombre o algo asi
-        //"Precio: " menuConsulta.precio
-        //"Platos:"  map como antes
-        //Tener en cuenta que puede no haber ninguno en la fecha o varios
-        return List.of();
-    }
-
-    @Override
-    public List<Plato> buscarPlato(EnumeracionTipo tipo, List<String> ingredientes) throws SQLException {
-        //Devuelve los platos de EnumeracionTipo que NO tienen ningún ingrediente de la lista
-        //Tener en cuenta que puede no haber ninguno o muchos
-        return List.of();
-    }
-
-    @Override
-    public void subirPlatoPrecio(String nombre, double porcentaje) throws ApplicationException {
-        //Incrementa el valor del plato en cierto porcentaje
-        //El plato se identifica por el nombre UNIQUE
-        //Valores entre 0 y 1 que habra que usar como porcentajes
-        //Por ejemplo 0.4 = 40%
-    }
-
-    @Override
-    public void close() throws Exception {
-        if(connection != null) {
-           this.connection.close();
-            this.connection = null;
-        }
-    }
-}
