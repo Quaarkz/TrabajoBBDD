@@ -5,6 +5,7 @@ import es.upsa.bbdd2.application.Impl.DaoImpl;
 import es.upsa.bbdd2.domain.entities.*;
 import es.upsa.bbdd2.exceptions.ApplicationException;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,7 +83,32 @@ public class Main {
                 System.err.println("Error al registrar el menú: " + e.getMessage());
             }
 
+            try {
+                LocalDate fechaPrueba = LocalDate.of(2025, 1, 20);
 
+                List<Menu> menus = dao.buscarMenu(fechaPrueba);
+
+                if (menus.isEmpty()) {
+                    System.out.println("No hay menús disponibles para la fecha indicada.");
+                } else {
+                    for (Menu menu : menus) {
+                        System.out.println("Menú: " + menu.getNombre());
+                        System.out.println(" Precio: " + menu.getPrecio());
+                        System.out.println(" Platos:");
+                        for (EnumeracionTipo tipo : EnumeracionTipo.values()) {
+                            if (menu.getPlatosPorTipo().containsKey(tipo)) {
+                                System.out.println(" " + tipo.name() + ":");
+                                for (Plato plato : menu.getPlatosPorTipo().get(tipo)) {
+                                    System.out.println("  " + plato.getNombre());
+                                }
+                            }
+                        }
+                    }
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             System.err.println("Error general: " + e.getMessage());
             e.printStackTrace();
