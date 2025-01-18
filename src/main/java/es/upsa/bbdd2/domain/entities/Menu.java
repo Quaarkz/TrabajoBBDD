@@ -19,7 +19,7 @@ public class Menu {
 
     private String id;
     private String nombre;
-    private float precio;
+    private double precio;
     private LocalDate desde;
     private LocalDate hasta;
     private Map<EnumeracionTipo, List<Plato>> platosPorTipo;

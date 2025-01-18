@@ -5,6 +5,7 @@ import es.upsa.bbdd2.application.Impl.DaoImpl;
 import es.upsa.bbdd2.domain.entities.*;
 import es.upsa.bbdd2.exceptions.ApplicationException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,9 +38,31 @@ public class Main {
                         ", Cantidad: " + compuesto.getCantidad() +
                         ", Unidad: " + compuesto.getUnidadMedida());
             }
+
+
+            String nombreMenu = "Menu de la semana";
+            LocalDate hasta = LocalDate.now();
+            LocalDate desde = LocalDate.now();
+            List<String> platos = new ArrayList<>();
+            platos.add(plato.getId());
+
+            Menu menu = dao.registrarMenu(nombreMenu, hasta, desde, platos);
+
+            System.out.println("Menu registrado con éxito:");
+            System.out.println("ID: " + menu.getId());
+            System.out.println("Nombre: " + menu.getNombre());
+            System.out.println("Desde: " + menu.getDesde());
+            System.out.println("Hasta: " + menu.getHasta());
+            System.out.println("Platos:");
+            for (Plato plato1 : menu.getPlatosPorTipo().get(tipo)) {
+                System.out.println("- Plato: " + plato1.getNombre() + ", Precio: " + plato1.getPrecio());
+            }
+
         } catch (ApplicationException applicationException) {
             throw new Exception(applicationException.getMessage());
         }
+
+
     }
 }
 
