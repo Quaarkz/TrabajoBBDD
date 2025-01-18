@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder(setterPrefix = "with")
 
-public class CantidadIngrediente {
-    private String nombre;
-    private int cantidad;
-    private UnidadMedida unidadMedida;
+public class Compuesto {
+    private Ingrediente ingrediente;
+    private double cantidad;
+    private String unidadMedida;
 }

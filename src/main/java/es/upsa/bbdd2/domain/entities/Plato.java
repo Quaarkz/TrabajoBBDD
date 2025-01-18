@@ -21,5 +21,5 @@ public class Plato {
     private String descripcion;
     private double precio;
     private EnumeracionTipo tipo;
-    private List<CantidadIngrediente> ingredientes;
+    private List<Compuesto> ingredientes;
 }
