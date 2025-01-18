@@ -15,7 +15,7 @@ import java.util.List;
 
 public class Menu {
 
-    private int id;
+    private String id;
     private String nombre;
     private float precio;
     private Date desde;

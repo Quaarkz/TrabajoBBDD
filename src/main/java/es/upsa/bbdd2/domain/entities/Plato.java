@@ -16,7 +16,7 @@ import java.util.List;
 
 public class Plato {
 
-    private int id;
+    private String id;
     private String nombre;
     private String descripcion;
     private float precio;

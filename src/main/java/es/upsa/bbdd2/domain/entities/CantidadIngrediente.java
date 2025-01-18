@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 
 public class CantidadIngrediente {
 
-    private int cantidad;
+    private String cantidad;
     private UnidadMedida unidadMedida;
 }
