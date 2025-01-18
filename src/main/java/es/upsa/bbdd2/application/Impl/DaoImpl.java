@@ -10,7 +10,9 @@ import org.postgresql.Driver;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DaoImpl implements Dao {
     Connection connection;
@@ -76,7 +78,30 @@ public class DaoImpl implements Dao {
         //      y un Map que representa los platos, su clave será EnumeracionTipo
         //      y su valor una lista formada por los platos con ese tipo
         //Si no existiera alguno de los platos de la lista se propagará excepcion y no se creará
-        return null;
+
+
+        final String MenuSql = "INSERT INTO Menu (id, nombre, hasta, desde) VALUES (nextval('seq_menus'), ?, ?, ?)" ;
+        final String PlatoSql = "INSERT INTO Plato (id, nombre, descripcion, precio, tipo) VALUES (nextval('seq_platos'), ?, ?, ?, ?)";
+
+        double SumaPrecios = 0.0;
+        Map<EnumeracionTipo, List<Plato>> platosPorTipo = new HashMap<>();
+
+        try{
+            connection.setAutoCommit(false);
+            for (String plato : platos) {
+                try(PreparedStatement stmt = connection.prepareStatement(PlatoSql)){
+                    stmt.setString(1, plato);
+                    try(ResultSet rs = stmt.executeQuery()){
+                        if(!rs.next()){
+                            throw new Exception("No se ha encontrado el plato");
+                        }
+                        Plato p = new Plato(rs.getString("id"), rs.getString("nombre"), rs.getString("descripcion"), rs.getFloat("precio"), EnumeracionTipo.valueOf(rs.getString("tipo")));
+                    }
+                }
+            }
+
+
+            return null;
     }
 
     @Override
