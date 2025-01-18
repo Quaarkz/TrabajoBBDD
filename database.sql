@@ -103,4 +103,22 @@ VALUES(nextval('seq_menus'), 'David', 132.3, '2025-01-18', '2025-10-24');
 INSERT INTO Menu(id,nombre,precio,desde,hasta)
 VALUES(nextval('seq_menus'), 'Claudia', 224.2, '2025-01-16', '2025-10-25');
 
+INSERT INTO Plato(id,nombre,descripcion,precio,tipo)
+VALUES(nextval('seq_platos'), 'Macarrones boloñesa', 'Macarrones a la boloñesa', 12.5, 'PRINCIPAL')
 
+INSERT INTO Plato(id,nombre,descripcion,precio,tipo)
+VALUES(nextval('seq_platos'), 'Atun con tomate', 'Atun plato completo', 15.5, 'ENTRANTE')
+
+INSERT INTO Ingrediente(id,nombre)
+VALUES(nextval('seq_ingredientes'), 'Pasta')
+
+INSERT INTO PlatoIngrediente(plato_id, ingrediente_id, cantidad, unidad_medida)
+VALUES
+    ('1', '1', 200, 'GRAMOS'), -- Macarrones con 200 gramos de Pasta
+    ('2', '1', 150, 'CENTILITROS'); -- Atun con 150 centilitros de Pasta
+
+INSERT INTO MenuPlato(menu_id, plato_id)
+VALUES
+    ('1', '1'), -- Menu David y Macarrones
+    ('1', '2'), -- Menu David y Atun
+    ('2', '2'); -- Menu Claudia y Atun
