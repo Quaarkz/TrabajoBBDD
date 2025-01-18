@@ -17,7 +17,5 @@ import java.util.List;
 public class Ingrediente {
     private String id;
     private String nombre;
-    private List<CantidadIngrediente> cantidades;
-
 }
 

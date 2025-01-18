@@ -19,8 +19,7 @@ public class Plato {
     private String id;
     private String nombre;
     private String descripcion;
-    private float precio;
+    private double precio;
     private EnumeracionTipo tipo;
-    private List<Ingrediente> ingredientes;//hacer enum
-
+    private List<CantidadIngrediente> ingredientes;
 }

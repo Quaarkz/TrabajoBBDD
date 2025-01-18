@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder(setterPrefix = "with")
 
 public class CantidadIngrediente {
-
+    private String nombre;
     private String cantidad;
     private UnidadMedida unidadMedida;
 }
