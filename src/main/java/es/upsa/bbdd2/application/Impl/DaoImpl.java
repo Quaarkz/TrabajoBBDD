@@ -115,7 +115,6 @@ public class DaoImpl implements Dao {
         }
     }
 
-
     @Override
     public Menu registrarMenu(String nombre, LocalDate hasta, LocalDate desde, List<String> platos) throws ApplicationException {
         //INSERT Menu
@@ -127,15 +126,22 @@ public class DaoImpl implements Dao {
         //Si no existiera alguno de los platos de la lista se propagará excepcion y no se creará
 
 
-        final String MenuSql = "INSERT INTO Menu (id, nombre, hasta, desde) VALUES (nextval('seq_menus'), ?, ?, ?)";
+        final String MenuSql = """
+                INSERT INTO Menu (id, nombre, precio, hasta, desde) VALUES (nextval('seq_menus'), ?, ?, ?, ?)
+            """;
 
+        final String selectPlato = """
+                SELECT * 
+                FROM plato as p
+                WHERE p.id = ?
+                """;
 
         final String[] fields = {"id"};
 
         double menuPrecio = 0.0;
         Map<EnumeracionTipo, List<Plato>> platosPorTipo = new HashMap<>();
         for (String plato : platos) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT precio FROM plato WHERE id = ?")) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectPlato)) {
                 preparedStatement.setString(1, plato);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
@@ -143,26 +149,25 @@ public class DaoImpl implements Dao {
                         EnumeracionTipo tipo = EnumeracionTipo.valueOf(resultSet.getString("tipo"));
                         if (platosPorTipo.containsKey(tipo)) {
                             platosPorTipo.get(tipo).add(Plato.builder()
-                                    .withId(plato)
+                                    .withId(resultSet.getString("id"))
                                     .withNombre(resultSet.getString("nombre"))
                                     .withDescripcion(resultSet.getString("descripcion"))
                                     .withPrecio(resultSet.getDouble("precio"))
                                     .withTipo(tipo)
                                     .build());
                         } else {
-                            List<Plato> platosAnadidos = new ArrayList<>();
-                            platosAnadidos.add(Plato.builder()
-                                    .withId(plato)
+                            List<Plato> platosAñadidos = new ArrayList<>();
+                            platosAñadidos.add(Plato.builder()
+                                    .withId(resultSet.getString("id"))
                                     .withNombre(resultSet.getString("nombre"))
                                     .withDescripcion(resultSet.getString("descripcion"))
                                     .withPrecio(resultSet.getDouble("precio"))
                                     .withTipo(tipo)
                                     .build());
-                            platosPorTipo.put(tipo, platosAnadidos);
+                            platosPorTipo.put(tipo, platosAñadidos);
                         }
                     } else {
                         throw new ApplicationException("El plato " + plato + " no existe");
-
                     }
                 }
             } catch (SQLException sqlException) {
@@ -174,15 +179,17 @@ public class DaoImpl implements Dao {
         Menu menuInsertado = Menu.builder()
                 .withId("0")
                 .withNombre(nombre)
+                .withPrecio(menuPrecio)
                 .withHasta(hasta)
                 .withDesde(desde)
-                .withPrecio(menuPrecio)
+                .withPlatosPorTipo(platosPorTipo)
                 .build();
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(MenuSql, fields)) {
             preparedStatement.setString(1, nombre);
-            preparedStatement.setDate(2, Date.valueOf(hasta));
-            preparedStatement.setDate(3, Date.valueOf(desde));
+            preparedStatement.setDouble(2, menuPrecio);
+            preparedStatement.setDate(3, Date.valueOf(hasta));
+            preparedStatement.setDate(4, Date.valueOf(desde));
             preparedStatement.executeUpdate();
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 generatedKeys.next();
@@ -208,41 +215,17 @@ public class DaoImpl implements Dao {
 
 
     @Override
-    public List<Menu> buscarMenu(LocalDate fecha) throws SQLException {
-        // Devuelve los objetos menús disponibles en la fecha determinada
-
-        List<Menu> menus = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "system", "manager")) {
-
-            String query = "SELECT m.nombre, m.precio, p.nombre ,p.descripcion " +
-                    "FROM Menu m " +
-                    "JOIN Plato p ON m.id = p.menu_id " +
-                    "WHERE m.desde <= ? and m.hasta >= ?";
-
-            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                preparedStatement.setDate(1, Date.valueOf(fecha));
-                preparedStatement.setDate(2, Date.valueOf(fecha));
-
-                try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    while (resultSet.next()) {
-                        String nombreMenu = resultSet.getString("nombre");
-                        double menuPrecio = resultSet.getDouble("precio");
-                        String nombrePlato = resultSet.getString("plato_nombre");
-                        String descripcionPlato = resultSet.getString("plato_descripcion");
-
-
-                    }
+                public List<Menu> buscarMenu (LocalDate fecha) throws SQLException {
+                    //Devuelve los objetos menús disponibles en la fecha determinada
+                    //La forma del objeto será:
+                    //"Menu: "   menuConsulta.nombre o algo asi
+                    //"Precio: " menuConsulta.precio
+                    //"Platos:"  map como antes
+                    //Tener en cuenta que puede no haber ninguno en la fecha o varios
+                    return List.of();
                 }
-            }
-        }
 
-        return menus;
-    }
-
-
-
-
-    @Override
+                @Override
                 public List<Plato> buscarPlato (EnumeracionTipo tipo, List < String > ingredientes) throws SQLException
                 {
                     //Devuelve los platos de EnumeracionTipo que NO tienen ningún ingrediente de la lista

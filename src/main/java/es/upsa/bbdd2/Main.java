@@ -7,62 +7,85 @@ import es.upsa.bbdd2.exceptions.ApplicationException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         try (Dao dao = new DaoImpl("jdbc:postgresql://localhost:5432/postgres", "system", "manager")) {
+            try {
+                // Registro de un plato
+                String nombrePlato = "Ensalada César";
+                String descripcion = "Ensalada fresca con aderezo César, pollo y crutones.";
+                double precio = 12.50;
+                EnumeracionTipo tipo = EnumeracionTipo.ENTRANTE;
 
-            String nombrePlato = "Ensalada César";
-            String descripcion = "Ensalada fresca con aderezo César, pollo y crutones.";
-            double precio = 12.50;
-            EnumeracionTipo tipo = EnumeracionTipo.ENTRANTE;
+                List<CantidadIngrediente> cantidadesIngredientes = new ArrayList<>();
+                cantidadesIngredientes.add(new CantidadIngrediente("Lechuga", 100, UnidadMedida.GRAMOS));
+                cantidadesIngredientes.add(new CantidadIngrediente("Pollo", 150, UnidadMedida.GRAMOS));
+                cantidadesIngredientes.add(new CantidadIngrediente("Aderezo César", 50, UnidadMedida.GRAMOS));
+                cantidadesIngredientes.add(new CantidadIngrediente("Crutones", 30, UnidadMedida.GRAMOS));
 
-            List<CantidadIngrediente> cantidadesIngredientes = new ArrayList<>();
-            cantidadesIngredientes.add(new CantidadIngrediente("Lechuga", 100, UnidadMedida.GRAMOS));
-            cantidadesIngredientes.add(new CantidadIngrediente("Pollo", 150, UnidadMedida.GRAMOS));
-            cantidadesIngredientes.add(new CantidadIngrediente("Aderezo César", 50, UnidadMedida.GRAMOS));
-            cantidadesIngredientes.add(new CantidadIngrediente("Crutones", 30, UnidadMedida.GRAMOS));
+                Plato plato = dao.registrarPlato(nombrePlato, descripcion, precio, tipo, cantidadesIngredientes);
 
-            Plato plato = dao.registrarPlato(nombrePlato, descripcion, precio, tipo, cantidadesIngredientes);
+                System.out.println("Plato registrado con éxito:");
+                System.out.println("ID: " + plato.getId());
+                System.out.println("Nombre: " + plato.getNombre());
+                System.out.println("Descripción: " + plato.getDescripcion());
+                System.out.println("Precio: " + plato.getPrecio());
+                System.out.println("Tipo: " + plato.getTipo());
+                System.out.println("Ingredientes:");
+                for (Compuesto compuesto : plato.getIngredientes()) {
+                    System.out.println("- Ingrediente: " + compuesto.getIngrediente().getNombre() +
+                            ", Cantidad: " + compuesto.getCantidad() +
+                            ", Unidad: " + compuesto.getUnidadMedida());
+                }
+            } catch (ApplicationException e) {
+                System.err.println("Error al registrar el plato: " + e.getMessage());
+            }
 
-            System.out.println("Plato registrado con éxito:");
-            System.out.println("ID: " + plato.getId());
-            System.out.println("Nombre: " + plato.getNombre());
-            System.out.println("Descripción: " + plato.getDescripcion());
-            System.out.println("Precio: " + plato.getPrecio());
-            System.out.println("Tipo: " + plato.getTipo());
-            System.out.println("Ingredientes:");
-            for (Compuesto compuesto : plato.getIngredientes()) {
-                System.out.println("- Ingrediente: " + compuesto.getIngrediente().getNombre() +
-                        ", Cantidad: " + compuesto.getCantidad() +
-                        ", Unidad: " + compuesto.getUnidadMedida());
+            try {
+                // Registro de un menú
+                String nombreMenu = "Menú Especial Invierno";
+                LocalDate desde = LocalDate.of(2025, 1, 1);
+                LocalDate hasta = LocalDate.of(2025, 1, 31);
+
+                // Lista de IDs de platos (uno inexistente para probar excepciones)
+                List<String> platosIds = Arrays.asList("1", "2");
+
+                // Registrar el menú y obtener el mapa de platos agrupados por tipo
+                Menu menu = dao.registrarMenu(nombreMenu, hasta, desde, platosIds);
+
+                System.out.println("Menú registrado con éxito:");
+                System.out.println("ID del menú: " + menu.getId());
+                System.out.println("Nombre: " + menu.getNombre());
+                System.out.println("Precio: " + menu.getPrecio());
+                System.out.println("Válido desde: " + menu.getDesde());
+                System.out.println("Válido hasta: " + menu.getHasta());
+
+                // Mostrar los platos agrupados por tipo
+                // Aquí se accede directamente al mapa de platos
+                Map<EnumeracionTipo, List<Plato>> platosPorTipo = menu.getPlatosPorTipo();
+
+                if (platosPorTipo != null && !platosPorTipo.isEmpty()) {
+                    platosPorTipo.forEach((tipoMenu, listaPlatos) -> {
+                        System.out.println("Tipo: " + tipoMenu);
+                        listaPlatos.forEach(plato -> {
+                            System.out.println("    - " + plato.getNombre());
+                        });
+                    });
+                } else {
+                    System.out.println("No hay platos registrados en este menú.");
+                }
+            } catch (ApplicationException e) {
+                System.err.println("Error al registrar el menú: " + e.getMessage());
             }
 
 
-            String nombreMenu = "Menu de la semana";
-            LocalDate hasta = LocalDate.now();
-            LocalDate desde = LocalDate.now();
-            List<String> platos = new ArrayList<>();
-            platos.add(plato.getId());
-
-            Menu menu = dao.registrarMenu(nombreMenu, hasta, desde, platos);
-
-            System.out.println("Menu registrado con éxito:");
-            System.out.println("ID: " + menu.getId());
-            System.out.println("Nombre: " + menu.getNombre());
-            System.out.println("Desde: " + menu.getDesde());
-            System.out.println("Hasta: " + menu.getHasta());
-            System.out.println("Platos:");
-            for (Plato plato1 : menu.getPlatosPorTipo().get(tipo)) {
-                System.out.println("- Plato: " + plato1.getNombre() + ", Precio: " + plato1.getPrecio());
-            }
-
-        } catch (ApplicationException applicationException) {
-            throw new Exception(applicationException.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error general: " + e.getMessage());
+            e.printStackTrace();
         }
-
-
     }
 }
-
