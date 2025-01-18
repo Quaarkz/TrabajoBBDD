@@ -214,16 +214,39 @@ public class DaoImpl implements Dao {
     }
 
 
-    @Override
-                public List<Menu> buscarMenu (LocalDate fecha) throws SQLException {
-                    //Devuelve los objetos menús disponibles en la fecha determinada
-                    //La forma del objeto será:
-                    //"Menu: "   menuConsulta.nombre o algo asi
-                    //"Precio: " menuConsulta.precio
-                    //"Platos:"  map como antes
-                    //Tener en cuenta que puede no haber ninguno en la fecha o varios
-                    return List.of();
+
+        @Override
+        public List<Menu> buscarMenu (LocalDate fecha) throws SQLException {
+            // Devuelve los objetos menús disponibles en la fecha determinada
+
+            List<Menu> menus = new ArrayList<>();
+            try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/postgres", "system", "manager")) {
+
+                String query = "SELECT m.nombre, m.precio, p.nombre ,p.descripcion " +
+                        "FROM Menu m " +
+                        "JOIN Plato p ON m.id = p.menu_id " +
+                        "WHERE m.desde <= ? and m.hasta >= ?";
+
+                try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                    preparedStatement.setDate(1, Date.valueOf(fecha));
+                    preparedStatement.setDate(2, Date.valueOf(fecha));
+
+                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                        while (resultSet.next()) {
+                            String nombreMenu = resultSet.getString("nombre");
+                            double menuPrecio = resultSet.getDouble("precio");
+                            String nombrePlato = resultSet.getString("plato_nombre");
+                            String descripcionPlato = resultSet.getString("plato_descripcion");
+
+
+                        }
+                    }
                 }
+            }
+
+            return menus;
+        }
+    }
 
                 @Override
                 public List<Plato> buscarPlato (EnumeracionTipo tipo, List < String > ingredientes) throws SQLException
