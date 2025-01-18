@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor
 @Builder(setterPrefix = "with")
@@ -20,5 +21,5 @@ public class Menu {
     private float precio;
     private Date desde;
     private Date hasta;
-    private List<Plato> platos;
+    private Map<EnumeracionTipo, List<Plato>> platosPorTipo;
 }
