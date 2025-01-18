@@ -84,31 +84,30 @@ public class Main {
             }
 
             try {
-                LocalDate fechaPrueba = LocalDate.of(2025, 1, 20);
+                List<Menu> menus = dao.buscarMenu(LocalDate.now());
+                System.out.println("Menus disponibles para la fecha actual:");
+                for (Menu menu : menus) {
+                    System.out.println("Nombre: " + menu.getNombre());
+                    System.out.println("Precio: " + menu.getPrecio());
+                }
+            } catch (SQLException e) {
+                System.err.println("Error al buscar los menus: " + e.getMessage());
+            }
 
-                List<Menu> menus = dao.buscarMenu(fechaPrueba);
-
-                if (menus.isEmpty()) {
-                    System.out.println("No hay menús disponibles para la fecha indicada.");
-                } else {
-                    for (Menu menu : menus) {
-                        System.out.println("Menú: " + menu.getNombre());
-                        System.out.println(" Precio: " + menu.getPrecio());
-                        System.out.println(" Platos:");
-                        for (EnumeracionTipo tipo : EnumeracionTipo.values()) {
-                            if (menu.getPlatosPorTipo().containsKey(tipo)) {
-                                System.out.println(" " + tipo.name() + ":");
-                                for (Plato plato : menu.getPlatosPorTipo().get(tipo)) {
-                                    System.out.println("  " + plato.getNombre());
-                                }
-                            }
-                        }
-                    }
+            try{
+                String nombrePlato = "Ensalada César";
+                List<Plato> platos = dao.buscarPlato(EnumeracionTipo.ENTRANTE, Arrays.asList("Lechuga", "Pollo"));
+                System.out.println("Platos encontrados:");
+                for (Plato plato : platos) {
+                    System.out.println("Nombre: " + plato.getNombre());
+                    System.out.println("Precio: " + plato.getPrecio());
                 }
 
             } catch (SQLException e) {
-                e.printStackTrace();
+                System.err.println("Error al ejecutar el servicio: " + e.getMessage());
             }
+
+
         } catch (Exception e) {
             System.err.println("Error general: " + e.getMessage());
             e.printStackTrace();
