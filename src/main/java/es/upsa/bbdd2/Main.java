@@ -47,15 +47,12 @@ public class Main {
             }
 
             try {
-                // Registro de un menú
                 String nombreMenu = "Menú Especial Invierno";
                 LocalDate desde = LocalDate.of(2025, 1, 1);
                 LocalDate hasta = LocalDate.of(2025, 1, 31);
 
-                // Lista de IDs de platos (uno inexistente para probar excepciones)
                 List<String> platosIds = Arrays.asList("1", "2");
 
-                // Registrar el menú y obtener el mapa de platos agrupados por tipo
                 Menu menu = dao.registrarMenu(nombreMenu, hasta, desde, platosIds);
 
                 System.out.println("Menú registrado con éxito:");
@@ -94,23 +91,31 @@ public class Main {
                 System.err.println("Error al buscar los menus: " + e.getMessage());
             }
 
-            try{
-                String nombrePlato = "Ensalada César";
+            try {
                 List<Plato> platos = dao.buscarPlato(EnumeracionTipo.ENTRANTE, Arrays.asList("Lechuga", "Pollo"));
                 System.out.println("Platos encontrados:");
                 for (Plato plato : platos) {
                     System.out.println("Nombre: " + plato.getNombre());
                     System.out.println("Precio: " + plato.getPrecio());
                 }
-
             } catch (SQLException e) {
                 System.err.println("Error al ejecutar el servicio: " + e.getMessage());
             }
 
+            try {
+                double porcentaje = 0.7;
+                String nombrePlato = "Atun con tomate";
 
-        } catch (Exception e) {
-            System.err.println("Error general: " + e.getMessage());
-            e.printStackTrace();
+                dao.subirPlatoPrecio(nombrePlato, porcentaje);
+
+            } catch (ApplicationException e) {
+                System.err.println("Error: " + e.getMessage());
+
+
+            } catch (Exception e) {
+                System.err.println("Error general: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }
