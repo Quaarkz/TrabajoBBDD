@@ -83,6 +83,15 @@ public class DaoImpl implements Dao {
         final String MenuSql = "INSERT INTO Menu (id, nombre, hasta, desde) VALUES (nextval('seq_menus'), ?, ?, ?)" ;
         final String PlatoSql = "INSERT INTO Plato (id, nombre, descripcion, precio, tipo) VALUES (nextval('seq_platos'), ?, ?, ?, ?)";
 
+        final String[] fields = {"id"};
+
+        Menu menuInsertado = Menu.builder()
+                .withId("0")
+                .withNombre(nombre)
+                .withHasta(hasta)
+                .withDesde(desde)
+                .build();
+
         double SumaPrecios = 0.0;
         Map<EnumeracionTipo, List<Plato>> platosPorTipo = new HashMap<>();
 
