@@ -25,27 +25,18 @@ public class DaoImpl implements Dao {
     @Override
     public Plato registrarPlato(String nombre, String descripcion, double precio, EnumeracionTipo tipo, List<CantidadIngrediente> cantidadesIngredientes) throws ApplicationException {
         final String SQL_INSERT_PLATO = """
-        
-                INSERT INTO plato(id, nombre, descripcion, precio, tipo) 
+        INSERT INTO plato(id, nombre, descripcion, precio, tipo) 
         VALUES(nextval('seq_platos'), ?, ?, ?, ?)
         """;
-        final String SQL_INSERT_INGREDIENTE =
-                """
-        INSERT INTO ingrediente(id,
-                nombre) 
-        VALUES(nextval(
-                'seq_ingredientes'), ?)
+        final String SQL_INSERT_INGREDIENTE = """
+        INSERT INTO ingrediente(id, nombre) 
+        VALUES(nextval('seq_ingredientes'), ?)
         """;
-        final String
-                SQL_SELECT_INGREDIENTE_ID = """
-        SELECT id
-                FROM ingrediente WHERE nombre = ?
+        final String SQL_SELECT_INGREDIENTE_ID = """
+        SELECT id FROM ingrediente WHERE nombre = ?
         """;
-        final
-                String SQL_INSERT_PLATO_INGREDIENTE = """
-        INSERT INTO platoingrediente(
-                plato_id,
-                ingrediente_id, cantidad, unidad_medida)
+        final String SQL_INSERT_PLATO_INGREDIENTE = """
+        INSERT INTO platoingrediente(plato_id, ingrediente_id, cantidad, unidad_medida)
         VALUES(?, ?, ?, ?)
         """;
 
@@ -118,13 +109,11 @@ public class DaoImpl implements Dao {
                     .withPrecio(precio)
                     .withTipo(tipo)
                     .withIngredientes(compuestos)
-                    .
-build();
+                    .build();
         } catch (SQLException sqlException) {
-
+            throw new ApplicationException(sqlException);
         }
     }
-
 
     @Override
     public Menu registrarMenu(String nombre, LocalDate hasta, LocalDate desde, List<String> platos) throws ApplicationException {
@@ -160,19 +149,18 @@ build();
                                     .withTipo(tipo)
                                     .build());
                         } else {
-                            List<Plato> platosAnadidos = new ArrayList<>();
-                            platosAnadidos.add(Plato.builder()
+                            List<Plato> platosAñadidos = new ArrayList<>();
+                            platosAñadidos.add(Plato.builder()
                                     .withId(plato)
                                     .withNombre(resultSet.getString("nombre"))
                                     .withDescripcion(resultSet.getString("descripcion"))
                                     .withPrecio(resultSet.getDouble("precio"))
                                     .withTipo(tipo)
                                     .build());
-                            platosPorTipo.put(tipo, platosAnadidos);
+                            platosPorTipo.put(tipo, platosAñadidos);
                         }
                     } else {
                         throw new ApplicationException("El plato " + plato + " no existe");
-
                     }
                 }
             } catch (SQLException sqlException) {
@@ -184,9 +172,9 @@ build();
         Menu menuInsertado = Menu.builder()
                 .withId("0")
                 .withNombre(nombre)
+                .withPrecio(menuPrecio)
                 .withHasta(hasta)
                 .withDesde(desde)
-                .withPrecio(menuPrecio)
                 .build();
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(MenuSql, fields)) {
