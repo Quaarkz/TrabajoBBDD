@@ -126,15 +126,22 @@ public class DaoImpl implements Dao {
         //Si no existiera alguno de los platos de la lista se propagará excepcion y no se creará
 
 
-        final String MenuSql = "INSERT INTO Menu (id, nombre, hasta, desde) VALUES (nextval('seq_menus'), ?, ?, ?)";
+        final String MenuSql = """
+                INSERT INTO Menu (id, nombre, precio, hasta, desde) VALUES (nextval('seq_menus'), ?, ?, ?, ?)
+            """;
 
+        final String selectPlato = """
+                SELECT * 
+                FROM plato as p
+                WHERE p.id = ?
+                """;
 
         final String[] fields = {"id"};
 
         double menuPrecio = 0.0;
         Map<EnumeracionTipo, List<Plato>> platosPorTipo = new HashMap<>();
         for (String plato : platos) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT precio FROM plato WHERE id = ?")) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(selectPlato)) {
                 preparedStatement.setString(1, plato);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
@@ -142,7 +149,7 @@ public class DaoImpl implements Dao {
                         EnumeracionTipo tipo = EnumeracionTipo.valueOf(resultSet.getString("tipo"));
                         if (platosPorTipo.containsKey(tipo)) {
                             platosPorTipo.get(tipo).add(Plato.builder()
-                                    .withId(plato)
+                                    .withId(resultSet.getString("id"))
                                     .withNombre(resultSet.getString("nombre"))
                                     .withDescripcion(resultSet.getString("descripcion"))
                                     .withPrecio(resultSet.getDouble("precio"))
@@ -151,7 +158,7 @@ public class DaoImpl implements Dao {
                         } else {
                             List<Plato> platosAñadidos = new ArrayList<>();
                             platosAñadidos.add(Plato.builder()
-                                    .withId(plato)
+                                    .withId(resultSet.getString("id"))
                                     .withNombre(resultSet.getString("nombre"))
                                     .withDescripcion(resultSet.getString("descripcion"))
                                     .withPrecio(resultSet.getDouble("precio"))
@@ -175,12 +182,14 @@ public class DaoImpl implements Dao {
                 .withPrecio(menuPrecio)
                 .withHasta(hasta)
                 .withDesde(desde)
+                .withPlatosPorTipo(platosPorTipo)
                 .build();
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(MenuSql, fields)) {
             preparedStatement.setString(1, nombre);
-            preparedStatement.setDate(2, Date.valueOf(hasta));
-            preparedStatement.setDate(3, Date.valueOf(desde));
+            preparedStatement.setDouble(2, menuPrecio);
+            preparedStatement.setDate(3, Date.valueOf(hasta));
+            preparedStatement.setDate(4, Date.valueOf(desde));
             preparedStatement.executeUpdate();
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 generatedKeys.next();
